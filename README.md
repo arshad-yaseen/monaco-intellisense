@@ -1,3 +1,3 @@
 # Monaco IntelliSense
 
-Your own Intellisence in Monaco Editor.
+Your own Intellisense in Monaco Editor.
