@@ -10,7 +10,7 @@
     "noImplicitAny": true,
     "allowJs": true,
     "noEmit": true,
-    "outDir": "dist",
+    "outDir": "build",
     "resolveJsonModule": true,
 
     "types": ["vitest/globals"]
