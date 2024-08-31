@@ -1,6 +1,6 @@
 {
   "name": "monaco-intellisense",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Your own Intellisense in Monaco Editor",
   "files": [
     "build"
