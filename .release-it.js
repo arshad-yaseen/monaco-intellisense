@@ -8,7 +8,7 @@ module.exports = {
   github: {
     release: true,
     draft: true,
-    releaseName: 'Monacopilot v${version}',
+    releaseName: 'monaco-intellisense v${version}',
     commitArgs: ['-S'],
     tagArgs: ['-s'],
     assets: ['tar/*.tgz'],
