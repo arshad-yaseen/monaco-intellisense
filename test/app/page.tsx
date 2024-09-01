@@ -13,55 +13,22 @@ export default function Home() {
 
     const objectIntellisense = object(monaco).nested(
       {
-        hello: {
-          world: {
-            super: {
-              nack: {
-                adipoli: 'Hello',
-                number: 42,
-                boolean: true,
-                null: null,
-                undefined: undefined,
-                array: [1, 2, 3],
-                object: {
-                  nestedKey: 'nestedValue',
-                },
-                function: () => console.log('Hello from function'),
-              },
-            },
+        user: {
+          name: 'John Doe',
+          age: 30,
+          address: {
+            street: '123 Main St',
+            city: 'Anytown',
+            zip: '12345',
           },
         },
-        goodbye: {
-          universe: {
-            amazing: {
-              wow: {
-                incredible: 'Goodbye',
-                bigInt: BigInt(9007199254740991),
-                symbol: Symbol('unique'),
-                date: new Date(),
-                regexp: /pattern/g,
-                map: new Map([['key', 'value']]),
-                set: new Set([1, 2, 3]),
-              },
-            },
-          },
-        },
-        deepNesting: {
-          level1: {
-            level2: {
-              level3: {
-                level4: {
-                  level5: {
-                    deepestValue: "You've gone too deep!",
-                  },
-                },
-              },
-            },
-          },
+        settings: {
+          theme: 'dark',
+          notifications: true,
         },
       },
       {
-        templateExpressionDelimiters: ['["', '"]'],
+        templateExpressionDelimiters: ['{{', '}}'],
       },
     );
 
@@ -75,8 +42,14 @@ export default function Home() {
       <Editor
         height="90vh"
         language="javascript"
+        theme="vs-dark"
         onMount={(_, monaco) => {
           setMonaco(monaco);
+        }}
+        options={{
+          padding: {
+            top: 10,
+          },
         }}
       />
     </main>
