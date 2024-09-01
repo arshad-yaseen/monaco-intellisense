@@ -8,6 +8,12 @@ Monaco Intellisense is a library that provides custom IntelliSense (code complet
 - 📊 Supports various data types including functions, arrays, objects, and more.
 - ⚙️ Configurable options for template expression delimiters and maximum depth of suggestions.
 
+## Installation
+
+```bash
+npm install monaco-intellisense
+```
+
 ## `object`
 
 The `object` module provides methods to register custom IntelliSense for objects within the Monaco Editor.
@@ -69,3 +75,7 @@ The `object.nested` method accepts an optional `options` parameter to configure 
   - **Default**: `Infinity`
 - `excludePrototype` (boolean): Whether to exclude prototype properties from completion suggestions.
   - **Default**: `true`
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/arshad-yaseen/monaco-intellisence/blob/main/LICENSE) file for details.
