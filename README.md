@@ -20,7 +20,7 @@ The `object` module provides methods to register custom IntelliSense for objects
 
 ### `object.nested`
 
-https://github.com/user-attachments/assets/3ef7793d-eb17-4422-a1fc-153f009e29eb
+https://github.com/user-attachments/assets/a1e41f97-aacc-44bb-94a4-c17ed85ad062
 
 The `object.nested` method registers a completion item provider for nested object properties.
 
