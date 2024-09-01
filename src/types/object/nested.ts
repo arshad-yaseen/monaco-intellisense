@@ -10,11 +10,6 @@ export interface ObjectNestedCompletionItems {
  */
 export interface NestedOptions {
   /**
-   * Characters that trigger completion suggestions.
-   * @default ['.']
-   */
-  triggerCharacters?: string[];
-  /**
    * Delimiters used to trigger completion suggestions within template expressions.
    * @example
    * ["{{", "}}"]

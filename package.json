@@ -12,6 +12,7 @@
     "build": "tsup src/index.ts",
     "dev": "tsup src/index.ts --watch",
     "test": "vitest --passWithNoTests",
+    "dev:test": "pnpm -C test dev",
     "type-check": "tsc --noEmit",
     "lint": "eslint . --ext .ts,.tsx --fix",
     "format": "prettier --write .",

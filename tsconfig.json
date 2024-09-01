@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es2020",
+    "target": "es2022",
     "module": "esnext",
     "strict": true,
     "esModuleInterop": true,
@@ -15,6 +15,6 @@
 
     "types": ["vitest/globals"]
   },
-  "exclude": ["node_modules", "build"],
+  "exclude": ["node_modules", "build", "test"],
   "include": ["src/**/*", "test/**/*", "*.ts"]
 }

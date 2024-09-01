@@ -1,4 +1,4 @@
-import {MonacoContext, Position, Range} from '../types/common';
+import {MonacoContext} from '../types/common';
 
 /**
  * Retrieves the text content up to the current cursor position.
@@ -23,19 +23,4 @@ export const getTextUpToPosition = (context: MonacoContext): string => {
 export const getColumnCount = (text: string): number => {
   const lines = text.split('\n');
   return lines[lines.length - 1].length + 1;
-};
-
-/**
- * Computes the range for inserting text at a given position.
- * @param {Position} position - The position where the text will be inserted.
- * @param {string} text - The text to be inserted.
- * @returns {Range} The range object representing the insertion area.
- */
-export const computeInsertRange = (position: Position, text: string): Range => {
-  return {
-    startLineNumber: position.lineNumber,
-    startColumn: position.column,
-    endLineNumber: position.lineNumber,
-    endColumn: position.column - 1 + getColumnCount(text),
-  };
 };

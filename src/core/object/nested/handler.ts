@@ -1,4 +1,7 @@
-import {DEFAULT_OPTIONS} from '../../../constants/object/nested';
+import {
+  DEFAULT_OPTIONS,
+  NESTED_COMPLETION_TRIGGER_EXPRESSIONS,
+} from '../../../constants/object/nested';
 import {
   CompletionItem,
   CompletionResult,
@@ -12,6 +15,7 @@ import {getTextUpToPosition} from '../../../utils/editor';
 import {
   createCompletionItem,
   getActiveTyping,
+  getCurrentNestedDepth,
   getCurrentToken,
 } from '../../../utils/object/nested';
 
@@ -27,8 +31,13 @@ export const objectNestedHandler = (
   return (context: MonacoContext): CompletionResult => {
     const text = getTextUpToPosition(context);
     const activeTyping = getActiveTyping(text, templateExpressionDelimiters);
-    const currentToken = getCurrentToken(items, activeTyping);
-    const isMember = activeTyping.charAt(activeTyping.length - 1) === '.';
+    const isMember = NESTED_COMPLETION_TRIGGER_EXPRESSIONS.some(expression =>
+      activeTyping.includes(expression),
+    );
+    const currentToken = getCurrentToken(items, activeTyping, isMember);
+    const currentDepth = getCurrentNestedDepth(activeTyping);
+
+    if (Object.keys(currentToken).length === 0) return {suggestions: []};
 
     const suggestions: CompletionItem[] = [];
 
@@ -36,32 +45,21 @@ export const objectNestedHandler = (
       token: ObjectNestedCompletionItems,
       depth: number = 0,
     ) {
-      if (depth >= maxDepth) return;
+      if (depth > maxDepth) return;
 
       for (const property in token) {
         if (
-          Object.prototype.hasOwnProperty.call(token, property) &&
-          !property.startsWith('__')
+          (excludePrototype && Object.hasOwn(token, property)) ||
+          (!excludePrototype && !property.startsWith('__'))
         ) {
-          const value = token[property];
-          if (
-            excludePrototype &&
-            !Object.prototype.hasOwnProperty.call(token, property)
-          )
-            continue;
-
           suggestions.push(
-            createCompletionItem(property, value, isMember, context),
+            createCompletionItem(property, token[property], isMember, context),
           );
-
-          if (typeof value === 'object' && value !== null) {
-            addSuggestions(value, depth + 1);
-          }
         }
       }
     }
 
-    addSuggestions(currentToken);
+    addSuggestions(currentToken, currentDepth);
 
     return {suggestions};
   };

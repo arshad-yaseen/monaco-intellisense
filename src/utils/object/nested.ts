@@ -5,7 +5,6 @@ import {
   MonacoContext,
 } from '../../types/common';
 import {ObjectNestedCompletionItems} from '../../types/object/nested';
-import {computeInsertRange} from '../editor';
 
 /**
  * Determines the CompletionItemKind based on the type of the item.
@@ -78,22 +77,74 @@ export const getActiveTyping = (
 export const getCurrentToken = (
   items: ObjectNestedCompletionItems,
   activeTyping: string,
+  isMember: boolean,
 ): ObjectNestedCompletionItems => {
-  const isMember = activeTyping.charAt(activeTyping.length - 1) === '.';
   if (!isMember) return items;
 
-  const objectHierarchy = activeTyping.slice(0, -1).split('.');
-  let currentToken = items;
+  const objectHierarchy = getObjectHierarchy(activeTyping);
+  let currentToken = items[objectHierarchy[0]];
 
-  for (const key of objectHierarchy) {
-    if (Object.prototype.hasOwnProperty.call(currentToken, key)) {
-      currentToken = currentToken[key];
+  if (objectHierarchy.length === 0) {
+    return {};
+  }
+
+  for (let i = 1; i < objectHierarchy.length; i++) {
+    if (Object.hasOwn(currentToken, objectHierarchy[i])) {
+      currentToken = currentToken[objectHierarchy[i]];
     } else {
       return {};
     }
   }
 
   return currentToken;
+};
+
+/**
+ * Parses the active typing string and returns an array representing the object hierarchy.
+ * Handles different types of delimiters used in the active typing.
+ *
+ * @param {string} activeTyping - The current active typing string.
+ * @returns {string[]} An array representing the object hierarchy.
+ */
+export const getObjectHierarchy = (activeTyping: string): string[] => {
+  // Helper function to split and join the active typing string based on the provided delimiters
+  const splitAndJoin = (
+    str: string,
+    delimiterStart: string,
+    delimiterEnd: string,
+  ): string[] => {
+    return str
+      .split(delimiterStart)
+      .join('.')
+      .split(delimiterEnd)
+      .join('.')
+      .split('.')
+      .filter(Boolean);
+  };
+
+  // Check for single quote delimiters and process accordingly
+  if (activeTyping.includes("['")) {
+    return splitAndJoin(activeTyping, "['", "']");
+  }
+
+  // Check for double quote delimiters and process accordingly
+  if (activeTyping.includes('["')) {
+    return splitAndJoin(activeTyping, '["', '"]');
+  }
+
+  // Default case: split by dot and remove the last character if it's a dot
+  return activeTyping.slice(0, -1).split('.').filter(Boolean);
+};
+
+/**
+ * Retrieves the current nested depth from the active typing.
+ * @param {string} activeTyping - The current active typing.
+ * @returns {number} The current nested depth.
+ * @example
+ * getCurrentNestedDepth('hello.world.super.nack.adipoli') // 4
+ */
+export const getCurrentNestedDepth = (activeTyping: string): number => {
+  return activeTyping.split('.').length;
 };
 
 /**
@@ -110,6 +161,7 @@ export const createCompletionItem = (
   isMember: boolean,
   context: MonacoContext,
 ): CompletionItem => {
+  const {monaco} = context;
   let detailType = '';
   try {
     detailType = value.__proto__.constructor.name;
@@ -117,18 +169,17 @@ export const createCompletionItem = (
     detailType = typeof value;
   }
 
-  const completionItem: CompletionItem = {
+  const completionItem = {
     label: property,
-    kind: getType(value, isMember, context.monaco),
+    kind: getType(value, isMember, monaco),
     detail: detailType,
     insertText: property,
     insertTextRules:
-      context.monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-    range: computeInsertRange(context.position, property),
-  };
+      monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+  } as CompletionItem;
 
   if (detailType.toLowerCase() === 'function') {
-    completionItem.insertText += '($0)';
+    completionItem.insertText += '($1) {\n\t$0\n}';
     completionItem.documentation = value.toString().split('{')[0];
   }
 
