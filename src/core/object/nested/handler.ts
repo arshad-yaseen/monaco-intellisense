@@ -5,8 +5,8 @@ import {
   MonacoContext,
 } from '../../../types/common';
 import {
-  CompletionObjectItem,
   NestedOptions,
+  ObjectNestedCompletionItems,
 } from '../../../types/object/nested';
 import {getTextUpToPosition} from '../../../utils/editor';
 import {
@@ -16,7 +16,7 @@ import {
 } from '../../../utils/object/nested';
 
 export const objectNestedHandler = (
-  obj: CompletionObjectItem,
+  items: ObjectNestedCompletionItems,
   options: NestedOptions = {},
 ): ((context: MonacoContext) => CompletionResult) => {
   const {maxDepth, excludePrototype, templateExpressionDelimiters} = {
@@ -27,12 +27,15 @@ export const objectNestedHandler = (
   return (context: MonacoContext): CompletionResult => {
     const text = getTextUpToPosition(context);
     const activeTyping = getActiveTyping(text, templateExpressionDelimiters);
-    const currentToken = getCurrentToken(obj, activeTyping);
+    const currentToken = getCurrentToken(items, activeTyping);
     const isMember = activeTyping.charAt(activeTyping.length - 1) === '.';
 
     const suggestions: CompletionItem[] = [];
 
-    function addSuggestions(token: CompletionObjectItem, depth: number = 0) {
+    function addSuggestions(
+      token: ObjectNestedCompletionItems,
+      depth: number = 0,
+    ) {
       if (depth >= maxDepth) return;
 
       for (const property in token) {

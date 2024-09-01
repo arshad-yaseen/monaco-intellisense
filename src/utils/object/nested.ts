@@ -4,7 +4,7 @@ import {
   Monaco,
   MonacoContext,
 } from '../../types/common';
-import {CompletionObjectItem} from '../../types/object/nested';
+import {ObjectNestedCompletionItems} from '../../types/object/nested';
 import {computeInsertRange} from '../editor';
 
 /**
@@ -71,19 +71,19 @@ export const getActiveTyping = (
 
 /**
  * Retrieves the current token from the object based on the active typing.
- * @param {CompletionObjectItem} obj - The object to search for the token.
+ * @param {ObjectNestedCompletionItems} items - The object to search for the token.
  * @param {string} activeTyping - The current active typing.
- * @returns {CompletionObjectItem} The current token or an empty object if not found.
+ * @returns {ObjectNestedCompletionItems} The current token or an empty object if not found.
  */
 export const getCurrentToken = (
-  obj: CompletionObjectItem,
+  items: ObjectNestedCompletionItems,
   activeTyping: string,
-): CompletionObjectItem => {
+): ObjectNestedCompletionItems => {
   const isMember = activeTyping.charAt(activeTyping.length - 1) === '.';
-  if (!isMember) return obj;
+  if (!isMember) return items;
 
   const objectHierarchy = activeTyping.slice(0, -1).split('.');
-  let currentToken = obj;
+  let currentToken = items;
 
   for (const key of objectHierarchy) {
     if (Object.prototype.hasOwnProperty.call(currentToken, key)) {

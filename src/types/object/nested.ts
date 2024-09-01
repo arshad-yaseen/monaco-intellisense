@@ -1,7 +1,7 @@
 /**
  * Represents an object with dynamic properties for completion suggestions.
  */
-export interface CompletionObjectItem {
+export interface ObjectNestedCompletionItems {
   [key: string]: any;
 }
 

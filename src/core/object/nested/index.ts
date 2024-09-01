@@ -1,39 +1,42 @@
 import {Disposable, Monaco, MonacoContext} from '../../../types/common';
 import {
-  CompletionObjectItem,
   NestedOptions,
+  ObjectNestedCompletionItems,
 } from '../../../types/object/nested';
 import {objectNestedHandler} from './handler';
 
 /**
- * Register nested object autocompletion with the Monaco editor.
- *
- * @param {Monaco} monaco - The Monaco editor instance.
- * @param {Object} params - The parameters for the nested completion provider.
- * @param {string} params.language - The language ID.
- * @param {CompletionObjectItem} params.obj - The object to provide completions for.
- * @param {NestedOptions} params.options - The options for the nested completion provider.
- * @returns {Disposable} The disposable object to remove the provider.
+ * Creates a function that registers a completion item provider for nested object properties.
  */
 export default (
   monaco: Monaco,
-  params: {
-    obj: CompletionObjectItem;
-    language: string;
-    options: NestedOptions;
-  },
-): Disposable => {
-  const {obj, language, options} = params;
-  const provider = objectNestedHandler(obj, options);
+  language: string,
+): ((
+  items: ObjectNestedCompletionItems,
+  options: NestedOptions,
+) => Disposable) => {
+  /**
+   * Registers a completion item provider for nested object properties.
+   *
+   * @param {ObjectNestedCompletionItems} items - The items to be used for completion suggestions.
+   * @param {NestedOptions} options - Additional options for the completion provider.
+   * @returns {Disposable} A disposable object that can be used to unregister the provider.
+   */
+  return (
+    items: ObjectNestedCompletionItems,
+    options: NestedOptions,
+  ): Disposable => {
+    const provider = objectNestedHandler(items, options);
 
-  return monaco.languages.registerCompletionItemProvider(language, {
-    provideCompletionItems: (model, position) => {
-      const context: MonacoContext = {
-        monaco,
-        model,
-        position,
-      };
-      return provider(context);
-    },
-  });
+    return monaco.languages.registerCompletionItemProvider(language, {
+      provideCompletionItems: (model, position) => {
+        const context: MonacoContext = {
+          monaco,
+          model,
+          position,
+        };
+        return provider(context);
+      },
+    });
+  };
 };
