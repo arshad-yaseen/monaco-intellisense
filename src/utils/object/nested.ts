@@ -127,11 +127,6 @@ export const getObjectHierarchy = (activeTyping: string): string[] => {
     return splitAndJoin(activeTyping, "['", "']");
   }
 
-  // Check for double quote delimiters and process accordingly
-  if (activeTyping.includes('["')) {
-    return splitAndJoin(activeTyping, '["', '"]');
-  }
-
   // Default case: split by dot and remove the last character if it's a dot
   return activeTyping.slice(0, -1).split('.').filter(Boolean);
 };

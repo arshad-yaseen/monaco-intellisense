@@ -19,7 +19,7 @@ export default (
     const provider = objectNestedHandler(items, options);
 
     return monaco.languages.registerCompletionItemProvider(language, {
-      triggerCharacters: ['.', '"', "'"],
+      triggerCharacters: ['.', "'"],
       provideCompletionItems: (model, position) => {
         const context: MonacoContext = {
           monaco,
