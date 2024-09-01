@@ -2,12 +2,6 @@
 
 Monaco Intellisense is a library that provides custom IntelliSense (code completion) for the Monaco Editor, enabling rich code completion experiences within the Monaco Editor.
 
-## Features
-
-- 🛠️ Customizable IntelliSense for nested objects.
-- 📊 Supports various data types including functions, arrays, objects, and more.
-- ⚙️ Configurable options for template expression delimiters and maximum depth of suggestions.
-
 ## Installation
 
 ```bash

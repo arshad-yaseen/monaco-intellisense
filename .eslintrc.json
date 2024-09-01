@@ -19,5 +19,5 @@
     "react/prop-types": "off",
     "@typescript-eslint/no-explicit-any": "off"
   },
-  "ignorePatterns": ["build/**/*", "node_modules/**/*"]
+  "ignorePatterns": ["build/**/*", "node_modules/**/*", "test/**/*"]
 }
