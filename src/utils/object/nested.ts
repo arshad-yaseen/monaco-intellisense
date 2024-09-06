@@ -18,18 +18,14 @@ export const getType = (
   isMember: boolean = false,
   monaco: Monaco,
 ): CompletionItemKind => {
-  switch (typeof item) {
-    case 'object':
-      return item === null
-        ? monaco.languages.CompletionItemKind.Value
-        : monaco.languages.CompletionItemKind.Class;
-    case 'function':
-      return isMember
-        ? monaco.languages.CompletionItemKind.Method
-        : monaco.languages.CompletionItemKind.Function;
-    default:
-      return monaco.languages.CompletionItemKind.Variable;
-  }
+  if (item === null) return monaco.languages.CompletionItemKind.Value;
+  if (typeof item === 'object')
+    return monaco.languages.CompletionItemKind.Class;
+  if (typeof item === 'function')
+    return isMember
+      ? monaco.languages.CompletionItemKind.Method
+      : monaco.languages.CompletionItemKind.Function;
+  return monaco.languages.CompletionItemKind.Variable;
 };
 
 /**
@@ -42,30 +38,13 @@ export const getActiveTyping = (
   text: string,
   templateExpressionDelimiters: string[],
 ): string => {
-  let activeTyping = text.split(' ').pop() || '';
-  const possiblyInsideString = templateExpressionDelimiters.some(delimiter =>
-    activeTyping.includes(delimiter),
+  const activeTyping = text.split(' ').pop() || '';
+  const lastDelimiterIndex = Math.max(
+    ...templateExpressionDelimiters.map(d => activeTyping.lastIndexOf(d)),
   );
-
-  if (possiblyInsideString) {
-    let lastDelimiterIndex = -1;
-    let lastDelimiterLength = 0;
-    templateExpressionDelimiters.forEach(delimiter => {
-      const index = activeTyping.lastIndexOf(delimiter);
-      if (index > lastDelimiterIndex) {
-        lastDelimiterIndex = index;
-        lastDelimiterLength = delimiter.length;
-      }
-    });
-
-    if (lastDelimiterIndex >= 0) {
-      activeTyping = activeTyping.substring(
-        lastDelimiterIndex + lastDelimiterLength,
-      );
-    }
-  }
-
-  return activeTyping;
+  return lastDelimiterIndex >= 0
+    ? activeTyping.substring(lastDelimiterIndex + 1)
+    : activeTyping;
 };
 
 /**
@@ -80,23 +59,12 @@ export const getCurrentToken = (
   isMember: boolean,
 ): ObjectNestedCompletionItems => {
   if (!isMember) return items;
-
   const objectHierarchy = getObjectHierarchy(activeTyping);
-  let currentToken = items[objectHierarchy[0]];
-
-  if (objectHierarchy.length === 0) {
-    return {};
-  }
-
-  for (let i = 1; i < objectHierarchy.length; i++) {
-    if (Object.hasOwn(currentToken, objectHierarchy[i])) {
-      currentToken = currentToken[objectHierarchy[i]];
-    } else {
-      return {};
-    }
-  }
-
-  return currentToken;
+  return objectHierarchy.reduce(
+    (current, key) =>
+      current && Object.hasOwn(current, key) ? current[key] : {},
+    items,
+  );
 };
 
 /**
@@ -107,28 +75,39 @@ export const getCurrentToken = (
  * @returns {string[]} An array representing the object hierarchy.
  */
 export const getObjectHierarchy = (activeTyping: string): string[] => {
-  // Helper function to split and join the active typing string based on the provided delimiters
-  const splitAndJoin = (
-    str: string,
-    delimiterStart: string,
-    delimiterEnd: string,
-  ): string[] => {
-    return str
-      .split(delimiterStart)
-      .join('.')
-      .split(delimiterEnd)
-      .join('.')
-      .split('.')
-      .filter(Boolean);
-  };
+  const result: string[] = [];
+  let current = '';
+  let inBracket = false;
 
-  // Check for single quote delimiters and process accordingly
-  if (activeTyping.includes("['")) {
-    return splitAndJoin(activeTyping, "['", "']");
+  for (let i = 0; i < activeTyping.length - 1; i++) {
+    const char = activeTyping[i];
+    if (char === '[' && activeTyping[i + 1] === "'") {
+      if (current) {
+        result.push(current);
+        current = '';
+      }
+      inBracket = true;
+      i++;
+    } else if (inBracket && char === "'" && activeTyping[i + 1] === ']') {
+      result.push(current);
+      current = '';
+      inBracket = false;
+      i++;
+    } else if (!inBracket && char === '.') {
+      if (current) {
+        result.push(current);
+        current = '';
+      }
+    } else {
+      current += char;
+    }
   }
 
-  // Default case: split by dot and remove the last character if it's a dot
-  return activeTyping.slice(0, -1).split('.').filter(Boolean);
+  if (current) {
+    result.push(current);
+  }
+
+  return result;
 };
 
 /**
@@ -139,7 +118,7 @@ export const getObjectHierarchy = (activeTyping: string): string[] => {
  * getCurrentNestedDepth('hello.world.super.nack.adipoli') // 4
  */
 export const getCurrentNestedDepth = (activeTyping: string): number => {
-  return activeTyping.split('.').length;
+  return (activeTyping.match(/\./g) || []).length;
 };
 
 /**
@@ -157,21 +136,16 @@ export const createCompletionItem = (
   context: MonacoContext,
 ): CompletionItem => {
   const {monaco} = context;
-  let detailType = '';
-  try {
-    detailType = value.__proto__.constructor.name;
-  } catch (e) {
-    detailType = typeof value;
-  }
+  const detailType = value?.constructor?.name || typeof value;
 
-  const completionItem = {
+  const completionItem: CompletionItem = {
     label: property,
     kind: getType(value, isMember, monaco),
     detail: detailType,
     insertText: property,
     insertTextRules:
       monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-  } as CompletionItem;
+  };
 
   if (detailType.toLowerCase() === 'function') {
     completionItem.insertText += '($1) {\n\t$0\n}';

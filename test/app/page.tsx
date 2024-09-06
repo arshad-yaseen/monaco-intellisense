@@ -7,9 +7,15 @@ import {object} from 'monaco-intellisense';
 
 export default function Home() {
   const [monaco, setMonaco] = useState<Monaco | null>(null);
+  const [performanceMetrics, setPerformanceMetrics] = useState<{
+    initTime: number;
+    disposalTime: number;
+  } | null>(null);
 
   useEffect(() => {
     if (!monaco) return;
+
+    const startTime = performance.now();
 
     const objectIntellisense = object(monaco).nested(
       {
@@ -32,8 +38,22 @@ export default function Home() {
       },
     );
 
+    const initTime = performance.now() - startTime;
+    setPerformanceMetrics(prev => ({
+      initTime,
+      disposalTime: prev?.disposalTime ?? 0,
+    }));
+
     return () => {
+      const disposalStartTime = performance.now();
       objectIntellisense.dispose();
+      const disposalTime = performance.now() - disposalStartTime;
+      setPerformanceMetrics(prev => {
+        if (prev === null) {
+          return {initTime: 0, disposalTime};
+        }
+        return {...prev, disposalTime};
+      });
     };
   }, [monaco]);
 
@@ -52,6 +72,18 @@ export default function Home() {
           },
         }}
       />
+      {performanceMetrics && (
+        <div className="mt-4">
+          <p>
+            Initialization Time: {performanceMetrics.initTime.toFixed(2)} ms
+          </p>
+          {performanceMetrics.disposalTime && (
+            <p>
+              Disposal Time: {performanceMetrics.disposalTime.toFixed(2)} ms
+            </p>
+          )}
+        </div>
+      )}
     </main>
   );
 }

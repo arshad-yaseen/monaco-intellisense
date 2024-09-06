@@ -7,12 +7,9 @@ import {MonacoContext} from '../types/common';
  */
 export const getTextUpToPosition = (context: MonacoContext): string => {
   const {model, position} = context;
-  return model.getValueInRange({
-    startLineNumber: position.lineNumber,
-    startColumn: 1,
-    endLineNumber: position.lineNumber,
-    endColumn: position.column,
-  });
+  return model
+    .getLineContent(position.lineNumber)
+    .substring(0, position.column - 1);
 };
 
 /**
@@ -21,6 +18,8 @@ export const getTextUpToPosition = (context: MonacoContext): string => {
  * @returns {number} The number of columns in the text.
  */
 export const getColumnCount = (text: string): number => {
-  const lines = text.split('\n');
-  return lines[lines.length - 1].length + 1;
+  const lastNewlineIndex = text.lastIndexOf('\n');
+  return lastNewlineIndex === -1
+    ? text.length + 1
+    : text.length - lastNewlineIndex;
 };

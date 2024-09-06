@@ -12,22 +12,26 @@ export default (
   items: ObjectNestedCompletionItems,
   options?: NestedOptions,
 ) => Disposable) => {
+  const createProvider = (
+    items: ObjectNestedCompletionItems,
+    options?: NestedOptions,
+  ) => {
+    const provider = objectNestedHandler(items, options);
+    return (model: any, position: any) => {
+      const context: MonacoContext = {monaco, model, position};
+      return provider(context);
+    };
+  };
+
   return (
     items: ObjectNestedCompletionItems,
     options?: NestedOptions,
   ): Disposable => {
-    const provider = objectNestedHandler(items, options);
+    const provideCompletionItems = createProvider(items, options);
 
     return monaco.languages.registerCompletionItemProvider(language, {
       triggerCharacters: ['.', "'"],
-      provideCompletionItems: (model, position) => {
-        const context: MonacoContext = {
-          monaco,
-          model,
-          position,
-        };
-        return provider(context);
-      },
+      provideCompletionItems,
     });
   };
 };

@@ -37,27 +37,29 @@ export const objectNestedHandler = (
     const currentToken = getCurrentToken(items, activeTyping, isMember);
     const currentDepth = getCurrentNestedDepth(activeTyping);
 
-    if (Object.keys(currentToken).length === 0) return {suggestions: []};
+    if (!currentToken || Object.keys(currentToken).length === 0)
+      return {suggestions: []};
 
     const suggestions: CompletionItem[] = [];
 
-    function addSuggestions(
+    const addSuggestions = (
       token: ObjectNestedCompletionItems,
       depth: number = 0,
-    ) {
+    ) => {
       if (depth > maxDepth) return;
 
-      for (const property in token) {
+      Object.entries(token).forEach(([property, value]) => {
         if (
-          (excludePrototype && Object.hasOwn(token, property)) ||
+          (excludePrototype &&
+            Object.prototype.hasOwnProperty.call(token, property)) ||
           (!excludePrototype && !property.startsWith('__'))
         ) {
           suggestions.push(
-            createCompletionItem(property, token[property], isMember, context),
+            createCompletionItem(property, value, isMember, context),
           );
         }
-      }
-    }
+      });
+    };
 
     addSuggestions(currentToken, currentDepth);
 
