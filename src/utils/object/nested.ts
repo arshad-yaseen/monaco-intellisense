@@ -138,14 +138,14 @@ export const createCompletionItem = (
   const {monaco} = context;
   const detailType = value?.constructor?.name || typeof value;
 
-  const completionItem: CompletionItem = {
+  const completionItem = {
     label: property,
     kind: getType(value, isMember, monaco),
     detail: detailType,
     insertText: property,
     insertTextRules:
       monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-  };
+  } as CompletionItem;
 
   if (detailType.toLowerCase() === 'function') {
     completionItem.insertText += '($1) {\n\t$0\n}';
