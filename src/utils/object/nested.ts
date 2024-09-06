@@ -148,7 +148,7 @@ export const createCompletionItem = (
   } as CompletionItem;
 
   if (detailType.toLowerCase() === 'function') {
-    completionItem.insertText += '($1) {\n\t$0\n}';
+    completionItem.insertText += '($1)';
     completionItem.documentation = value.toString().split('{')[0];
   }
 
